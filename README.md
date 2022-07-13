@@ -1,5 +1,5 @@
 
-# ESEF data collector
+# ESEF Filing Analyzer
 
 ## Projekt im Rahmen einer Masterarbeit zu dem Thema *Die Verwendung der Erweiterungstaxonomie bei ESEF – Kritische Würdigung und deskriptiver Befund* an der Professur für Rechnungslegung und Wirtschaftsprüfung von Prof. Dr. Jörg-Markus Hitz der Georg-August-Universität Göttingen
 
