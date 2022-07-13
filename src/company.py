@@ -1,17 +1,9 @@
 import json
 import os
 
-import eikon as ek
+import numpy as np
 
-import pandas as pd
-
-import filing
-
-EIKON_APP_KEY = "5470a751badf47c4bc9e3e92cd0f04843c1f6838"
-ek.set_app_key(EIKON_APP_KEY)
-
-# LEI -> Company
-COMPANIES = {}
+import eikon_hook
 
 PATH_COMPANIES = "./companies"
 
@@ -27,36 +19,8 @@ class Company():
         self.esef_filings = {}
 
     def get_company_data(self):
-        trf_common_name = ek.TR_Field("TR.CommonName")
-        trf_business_summary = ek.TR_Field("TR.BusinessSummary")
-        trf_trbc_economic_sector = ek.TR_Field("TR.TRBCEconomicSector")
-        trf_exchange_country = ek.TR_Field("TR.ExchangeCountry")
-        trf_exchange_name = ek.TR_Field("TR.ExchangeName")
-        trf_company_market_cap_2020 = ek.TR_Field("TR.CompanyMarketCap",
-        params = {
-            "SDate" : "20201231",
-            "Scale" : 6,
-            "Curn" : "EUR"
-        })
-        trf_company_market_cap_2021 = ek.TR_Field("TR.CompanyMarketCap",
-        params = {
-            "SDate" : "20211231",
-            "Scale" : 6,
-            "Curn" : "EUR"
-        })
-        
-        data, err = ek.get_data("{}@LEI".format(self.lei),
-            [
-                trf_common_name,
-                trf_business_summary,
-                trf_trbc_economic_sector,
-                trf_exchange_country,
-                trf_exchange_name,
-                trf_company_market_cap_2020,
-                trf_company_market_cap_2021
-            ])
 
-        fields = data.iloc[0]
+        fields = eikon_hook.get_company_data(self.lei)
 
         self.common_name = fields[1]
         self.business_summary = fields[2]
@@ -66,9 +30,11 @@ class Company():
         self.company_market_cap["2020"] = fields[6]
         self.company_market_cap["2021"] = fields[7]
 
-def create_companies():
-    for f in filing.FILINGS:
-        c = COMPANIES.get(f.lei)
+def create_companies(filings):
+    companies = {}
+
+    for f in filings:
+        c = companies.get(f.lei)
         new_c = False
 
         if c is None:
@@ -80,17 +46,25 @@ def create_companies():
         c.get_company_data()
 
         if new_c:
-            COMPANIES[f.lei] = c
+            companies[f.lei] = c
+
+    return companies
 
 def _serialize(obj):
+    if isinstance(obj, np.int64): #in manchen Fällen hat der Marktwert des Unternehmens den Typ numpy.int64
+        return obj.item() #numpy.int64 in int konvertieren
+
     return vars(obj)
 
-def save_companies():
+def save_companies(companies):
     try:
         os.mkdir(PATH_COMPANIES)
     except FileExistsError:
         pass
 
-    for k, v in COMPANIES.items():
+    for k, v in companies.items():
+
+        print("Saving {} to json.".format(v.common_name))
+
         with open("{}/{}.json".format(PATH_COMPANIES, k), "w") as file:
             json.dump(v, file, default=_serialize, indent=4)

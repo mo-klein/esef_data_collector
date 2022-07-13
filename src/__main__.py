@@ -1,19 +1,22 @@
 import filing
 import company
-import statistics
+import data_analytics
+import eikon_hook
 
 def main():
-    filing.extract_filings()
-    filing.read_filings()
+    eikon_hook.set_app_key()
 
-    company.create_companies()
-    company.save_companies()
+    df = data_analytics.load_dataframe()
 
-    df = statistics.build_dataframe()
+    filings = filing.read_filings(df)
 
-    print(df)
+    companies = company.create_companies(filings)
+    company.save_companies(companies)
 
-    
+    df = data_analytics.append_companies(df, companies)
+
+    data_analytics.group_by_country(df)
+    data_analytics.group_by_sector(df)
 
 if __name__ == "__main__":
     main()
