@@ -12,16 +12,20 @@ from arelle.ModelInstanceObject import ModelContext
 import data_analytics
 
 """
-Definiere drei Ordner mit folgenden Funktionen:
-- archives: Beinhaltet für jedes Jahr die noch nicht verarbeiteten .zip Archive der ESEF-Berichte
+- archives: Beinhaltet für jedes Jahr die noch nicht verarbeiteten .zip Archive der ESEF-Berichte (funktion aktuell nicht verfügbar)
 - filings: Beinhaltet die entpacken ESEF-Berichte
 """
 
 PATH_ARCHIVES = "./archives"
 PATH_FILINGS = "./filings"
 
-#Methode nicht optimal für komplexere Berichte, wie sie in Deutschland veröffentlicht werden.
-# => zunächst manuelles entpacken der Berichte, bis Zeit für eine Überarbeitung der Methode ist.
+
+"""
+Entpackt nacheinander alle im Ordner "archives" vorhandenen ESEF-Berichte und verschiebt die entpackten Berichte in den Ordner "filings".
+Während der Arbeit mit dem Programm wurde festgestellt, dass die zip-Archive nicht immer einheitlich aufgebaut sind, daher
+wird diese Methode zunächst nicht mehr unterstützt und die ESEF-Berichte müssen manuell entpackt werden.
+"""
+
 def extract_filings():
 
     extracted_filings = os.listdir(PATH_FILINGS)
@@ -38,9 +42,10 @@ def extract_filings():
 
             os.remove(entry.path)
 
-# Taxonomiepakete befinden sich stets in der Datei META-INF/taxonomyPackage.xml
-# Berichte befinden sich stets in der Datei reports/bericht.xhtml
-# Berichte werden nur eingelesen, sofern sie nicht schon in der Datenbank enthalten sind
+"""
+Liest nacheinander alle im Ordner "filings" befindlichen ESEF-Berichte ein. Die Berichte werden nur eingelesen, sofern sie nicht schon in der Datenbank enthalten sind.
+"""
+
 def read_filings(df):
     cntlr = CntlrItegrated()
 

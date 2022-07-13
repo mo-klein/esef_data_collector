@@ -57,7 +57,8 @@ def load_dataframe():
 
         return pd.DataFrame(data=data)
 
-#Baut das "Haupt-DataFrame" mit allen Unternehmen. Dieses DF wird dann im Programmablauf entsprechend des aktuellen Untersuchungsgegenstandes modifiziert.
+"""Baut das "Haupt-DataFrame" mit allen Unternehmen. Dieses DF wird dann im Programmablauf entsprechend des aktuellen Untersuchungsgegenstandes modifiziert."""
+
 def append_companies(df, companies):
     if len(companies) == 0:
         return df
@@ -216,6 +217,9 @@ def group_by_market_cap(df):
 
 def show_graph_all(df):
     assert isinstance(df, pd.DataFrame)
+
+    if df.empty:
+        return
 
     df = df.sort_values("EXT_FACTS_PCT", ascending=False)
 
