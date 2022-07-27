@@ -51,6 +51,8 @@ def read_filings(df):
 
     filings = []
 
+    not_loadable = {}
+
     with os.scandir(PATH_FILINGS) as dir_iter:
         for entry in dir_iter:
             url_filing = ""
@@ -86,8 +88,14 @@ def read_filings(df):
                     modelXbrl.close()
                 except BaseException as e:
                     print("Fehler beim Laden von {}: {}".format(entry.name, e))
+                    not_loadable[entry.name] = e
+
             else:
                 print("\n\t==> Bericht wird nicht geladen (Daten schon vorhanden oder fehlerhaft).\n")
+
+    print("\nFolgende Berichte konnten aufgrund eines fehlerhaften Berichtspaktes nicht geladen werden:")
+    print(not_loadable)
+    print("\n")
 
     return filings
 
@@ -135,7 +143,7 @@ def _read_facts(filings, modelXbrl, sha1):
 
             date_period_end = (context.endDatetime - timedelta(days=1)).date()
 
-            filing.period_end = str(date_period_end.year) + str(date_period_end.month) + str(date_period_end.day)
+            filing.period_end = str(date_period_end.year) + "{:02d}".format(date_period_end.month) + str(date_period_end.day)
 
     if filing.lei is not None and filing.period_end is not None:
         filings.append(filing)

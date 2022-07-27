@@ -9,21 +9,21 @@ import numpy as np
 import filing
 import company
 
-PATH_DATA_DIR = "./data/"
-PATH_DF = PATH_DATA_DIR + "DATA.xlsx"
+PATH_OUTPUT_DIR = "./output/"
+PATH_SF = PATH_OUTPUT_DIR + "sample.xlsx"
 
-PATH_COUNTRIES_DIR = PATH_DATA_DIR + "/countries/"
-PATH_SECTORS_DIR = PATH_DATA_DIR + "/sectors/"
+PATH_COUNTRIES_DIR = PATH_OUTPUT_DIR + "/countries/"
+PATH_SECTORS_DIR = PATH_OUTPUT_DIR + "/sectors/"
 
 #definiere Spalten des "Haupt-DataFrames"
 CLMN_LEI = "LEI"
 CLMN_COMPANY = "COMPANY"
-CLMN_TRBC_SECTOR = "TRBC_SECTOR"
+CLMN_NAICS_SECTOR = "NAICS_SECTOR"
 CLMN_COUNTRY = "COUNTRY"
 CLMN_STOCK_EXCHANGE = "STOCK_EXCHANGE"
-CLMN_INDEX = "INDEX"
-CLMN_YEAR = "YEAR"
+CLMN_PERIOD_END = "PERIOD_END"
 CLMN_MARKET_CAP = "MARKET_CAP"
+CLMN_FREE_FLOAT = "FREE_FLOAT"
 CLMN_ALL_FACTS = "ALL_FACTS"
 CLMN_ALL_FACTS_PCT = "ALL_FACTS_PCT"
 CLMN_ESEF_FACTS = "ESEF_FACTS"
@@ -33,19 +33,19 @@ CLMN_EXT_FACTS_PCT = "EXT_FACTS_PCT"
 CLMN_SHA1 = "SHA1"
 
 def load_dataframe():
-    if os.path.exists(PATH_DF):
-        return pd.read_excel(PATH_DF, index_col=0)
+    if os.path.exists(PATH_SF):
+        return pd.read_excel(PATH_SF, index_col=0)
     else:
 
         data = {
             CLMN_LEI : [],
             CLMN_COMPANY : [],
-            CLMN_TRBC_SECTOR : [],
+            CLMN_NAICS_SECTOR : [],
             CLMN_COUNTRY : [],
             CLMN_STOCK_EXCHANGE : [],
-            CLMN_INDEX : [],
-            CLMN_YEAR : [],
+            CLMN_PERIOD_END : [],
             CLMN_MARKET_CAP: [],
+            CLMN_FREE_FLOAT: [],
             CLMN_ALL_FACTS : [],
             CLMN_ALL_FACTS_PCT: [],
             CLMN_ESEF_FACTS : [],
@@ -66,12 +66,12 @@ def append_companies(df, companies):
     data = {
         CLMN_LEI : [],
         CLMN_COMPANY : [],
-        CLMN_TRBC_SECTOR : [],
+        CLMN_NAICS_SECTOR : [],
         CLMN_COUNTRY : [],
         CLMN_STOCK_EXCHANGE : [],
-        CLMN_INDEX : [],
-        CLMN_YEAR : [],
+        CLMN_PERIOD_END : [],
         CLMN_MARKET_CAP: [],
+        CLMN_FREE_FLOAT: [],
         CLMN_ALL_FACTS : [],
         CLMN_ALL_FACTS_PCT: [],
         CLMN_ESEF_FACTS : [],
@@ -84,45 +84,46 @@ def append_companies(df, companies):
     for l, c in companies.items():
         assert isinstance(c, company.Company)
 
-        for year, f in c.esef_filings.items():
-            assert isinstance(f, filing.ESEFFiling)
+        f = c.esef_filing
 
-            data[CLMN_LEI].append(c.lei)
-            data[CLMN_COMPANY].append(c.common_name)
-            data[CLMN_TRBC_SECTOR].append(c.trbc_economic_sector)
-            data[CLMN_COUNTRY].append(c.exchange_country)
-            data[CLMN_STOCK_EXCHANGE].append(c.exchange_name)
-            data[CLMN_INDEX].append("")
-            data[CLMN_YEAR].append(year)
-            data[CLMN_MARKET_CAP].append("n/a")
+        assert isinstance(f, filing.ESEFFiling)
 
-            all_facts = len(f.facts)
+        data[CLMN_LEI].append(c.lei)
+        data[CLMN_COMPANY].append(c.common_name)
+        data[CLMN_NAICS_SECTOR].append(c.naics_sector)
+        data[CLMN_COUNTRY].append(c.exchange_country)
+        data[CLMN_STOCK_EXCHANGE].append(c.exchange_name)
+        data[CLMN_PERIOD_END].append(f.period_end)
+        data[CLMN_MARKET_CAP].append(c.company_market_cap)
+        data[CLMN_FREE_FLOAT].append(c.free_float)
 
-            data[CLMN_ALL_FACTS].append(all_facts)
-            data[CLMN_ALL_FACTS_PCT].append(100.0)
+        all_facts = len(f.facts)
 
-            esef_facts = 0
-            ext_facts = 0
+        data[CLMN_ALL_FACTS].append(all_facts)
+        data[CLMN_ALL_FACTS_PCT].append(100.0)
 
-            for fct in f.facts:
-                assert isinstance(fct, filing.ESEFFact)
+        esef_facts = 0
+        ext_facts = 0
 
-                if fct.is_extension:
-                    ext_facts += 1
-                else:
-                    esef_facts += 1
+        for fct in f.facts:
+            assert isinstance(fct, filing.ESEFFact)
 
-            data[CLMN_ESEF_FACTS].append(esef_facts)
-            data[CLMN_ESEF_FACTS_PCT].append(round(float(esef_facts) / float(all_facts) * 100, 2))
-            data[CLMN_EXT_FACTS].append(ext_facts)
-            data[CLMN_EXT_FACTS_PCT].append(round(float(ext_facts) / float(all_facts) * 100, 2))
-            data[CLMN_SHA1].append(f.sha1)
+            if fct.is_extension:
+                ext_facts += 1
+            else:
+                esef_facts += 1
+
+        data[CLMN_ESEF_FACTS].append(esef_facts)
+        data[CLMN_ESEF_FACTS_PCT].append(round(float(esef_facts) / float(all_facts) * 100, 2))
+        data[CLMN_EXT_FACTS].append(ext_facts)
+        data[CLMN_EXT_FACTS_PCT].append(round(float(ext_facts) / float(all_facts) * 100, 2))
+        data[CLMN_SHA1].append(f.sha1)
 
     df_to_append = pd.DataFrame(data=data)
 
     df = pd.concat([df, df_to_append], ignore_index=True)
 
-    df.to_excel(PATH_DF)
+    df.to_excel(PATH_SF)
 
     return df
 
@@ -179,7 +180,7 @@ def group_by_sector(df):
 
     sectors = []
 
-    s_sectors = df["TRBC_SECTOR"] #get series with all sectors
+    s_sectors = df["NAICS_SECTOR"] #get series with all sectors
 
     for sector in s_sectors:
         try:
@@ -190,7 +191,7 @@ def group_by_sector(df):
     df_sectors = pd.DataFrame()
 
     for sector in sectors:
-        df_filtered_by_sector = df[df["TRBC_SECTOR"] == sector] #dataframe mit allen Unternehmen eines Sektors
+        df_filtered_by_sector = df[df["NAICS_SECTOR"] == sector] #dataframe mit allen Unternehmen eines Sektors
 
         df_filtered_by_sector.to_excel(PATH_SECTORS_DIR + "{}.xlsx".format(sector.lower().replace(" ", "_"))) #speichern aller Unternehmen eines Sektors
         

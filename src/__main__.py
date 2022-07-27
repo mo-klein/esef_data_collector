@@ -18,7 +18,7 @@ def main():
     data_analytics.group_by_country(df)
     data_analytics.group_by_sector(df)
 
-    data_analytics.show_graph_all(df)
+    #data_analytics.show_graph_all(df)
 
 if __name__ == "__main__":
     main()

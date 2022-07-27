@@ -12,23 +12,24 @@ class Company():
         self.lei = lei
         self.common_name = None
         self.business_summary = None
-        self.trbc_economic_sector = None
+        self.naics_sector = None
         self.exchange_country = None
         self.exchange_name = None
-        self.company_market_cap = {}
-        self.esef_filings = {}
+        self.company_market_cap = None
+        self.free_float = None
+        self.esef_filing = None
 
     def get_company_data(self):
 
-        fields = eikon_hook.get_company_data(self.lei)
+        fields = eikon_hook.get_company_data(self)
 
         self.common_name = fields[1]
         self.business_summary = fields[2]
-        self.trbc_economic_sector = fields[3]
+        self.naics_sector = fields[3]
         self.exchange_country = fields[4]
         self.exchange_name = fields[5]
-        self.company_market_cap["2020"] = fields[6]
-        self.company_market_cap["2021"] = fields[7]
+        self.company_market_cap = fields[6]
+        self.free_float = fields[7]
 
 def create_companies(filings):
     companies = {}
@@ -41,7 +42,7 @@ def create_companies(filings):
             c = Company(f.lei)
             new_c = True
         
-        c.esef_filings[f.period_end] = f
+        c.esef_filing = f
 
         c.get_company_data()
 
