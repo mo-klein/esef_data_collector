@@ -1,8 +1,3 @@
-archives/
-filings/
-not_valid/
-companies/
-companies_2020/
-companies_2021/
-data/
+import/
+samples/
 src/__pycache__

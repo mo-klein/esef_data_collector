@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 
 import filing
-import company
 
 PATH_OUTPUT_DIR = "./output/"
 PATH_SF = PATH_OUTPUT_DIR + "sample.xlsx"
@@ -126,16 +125,6 @@ def append_companies(df, companies):
     df.to_excel(PATH_SF)
 
     return df
-
-def has_filing(df, sha1):
-    assert isinstance(df, pd.DataFrame)
-
-    if df.empty:
-        return False
-
-    df_filtered_by_sha1 = df["SHA1"].where(df["SHA1"] == sha1).dropna()
-
-    return not df_filtered_by_sha1.empty
 
 def group_by_country(df):
     assert isinstance(df, pd.DataFrame)
