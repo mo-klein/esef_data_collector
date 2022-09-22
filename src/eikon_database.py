@@ -39,7 +39,7 @@ def get_company_data(reports: list):
             # Definiere Datenfelder
             trf_isin = ek.TR_Field("TR.ISIN")
             trf_common_name = ek.TR_Field("TR.CommonName")
-            trf_naics_sector = ek.TR_Field("TR.NAICSSector")
+            trf_sector = ek.TR_Field("TR.TRBCEconomicSector")
             trf_country = ek.TR_Field("TR.ExchangeCountry")
             trf_market_cap = ek.TR_Field("TR.CompanyMarketCap",
                 params = {
@@ -121,7 +121,7 @@ def get_company_data(reports: list):
                         _get_tr_fields(report, instrument_isin,
                             [
                                 trf_common_name,
-                                trf_naics_sector,
+                                trf_sector,
                                 trf_country,
                                 trf_market_cap,
                                 trf_free_float,
@@ -154,7 +154,7 @@ def get_company_data(reports: list):
                     break
                     
 def _get_tr_fields(report: List, instrument: str, tr_fields: List, params: Dict):
-    
+
     if not instrument:
         print("\n\t==> Achtung, es konnten keine Daten zu dem Unternehmen geladen werden, da der Instrument-Identifier nicht ermittelbar ist.")
 
@@ -178,11 +178,9 @@ def _get_tr_fields(report: List, instrument: str, tr_fields: List, params: Dict)
 
     i = 0
     for index, value in data.iloc[0].iteritems():
-        if i == 0 and index != "ISIN":
+        if i == 0:
+            i += 1
             continue
-        
-        print("Index: {}".format(index))
-        print("Append: {}".format(value))
 
         report.append(value)
         i += 1
